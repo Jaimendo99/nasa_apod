@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>NASA Astronomy Picture of the Day</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>NASA Astronomy Picture of the Day</h1>
+        <div class="date-nav">
+            <a href="/?date={{ prev_date }}" class="btn">Previous Day</a>
+            <span>{{ date }}</span>
+            <a href="/?date={{ next_date }}" class="btn">Next Day</a>
+        </div>
+        {% if error %}
+            <p class="error">Error: {{ error }}</p>
+        {% else %}
+            <h2>{{ apod_data.title }}</h2>
+            <p class="date">{{ apod_data.date }}</p>
+            <img src="{{ apod_data.url }}" alt="{{ apod_data.title }}">
+            <p class="explanation">{{ apod_data.explanation }}</p>
+            <p class="copyright">&copy; {{ apod_data.copyright }}</p>
+        {% endif %}
+    </div>
+</body>
+</html>
