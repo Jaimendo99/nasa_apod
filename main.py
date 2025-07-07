@@ -14,18 +14,14 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-app = FastAPI()
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Ensure data directory exists on startup
     os.makedirs("/app/data", exist_ok=True)
     Base.metadata.create_all(bind=engine)
     yield
-    # Clean up resources on shutdown if needed
 
+app = FastAPI(lifespan=lifespan)
 templates = Jinja2Templates(directory="templates")
-
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 def get_db():
