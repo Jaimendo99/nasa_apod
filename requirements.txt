@@ -11,3 +11,4 @@ python-jose[cryptography]
 python-multipart
 pytest-cov
 prometheus-client
+starlette-prometheus

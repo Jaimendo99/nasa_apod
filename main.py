@@ -12,7 +12,7 @@ from datetime import datetime, timedelta
 from database import SessionLocal, User, Favorite, engine, Base
 from auth import get_password_hash, verify_password, create_access_token, get_current_user
 from dotenv import load_dotenv
-from prometheus_client import make_asgi_app
+from starlette_prometheus import metrics, PrometheusMiddleware
 
 load_dotenv()
 
@@ -38,12 +38,10 @@ async def lifespan(app: FastAPI):
     # Clean up resources on shutdown if needed
 
 app = FastAPI(lifespan=lifespan)
+app.add_middleware(PrometheusMiddleware)
+app.add_route("/metrics", metrics)
 templates = Jinja2Templates(directory="templates")
 app.mount("/static", StaticFiles(directory="static"), name="static")
-
-# Add prometheus asgi middleware to route /metrics requests
-metrics_app = make_asgi_app()
-app.mount("/metrics", metrics_app)
 
 def get_db():
     db = SessionLocal()
