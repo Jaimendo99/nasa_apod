@@ -17,6 +17,7 @@ app = FastAPI()
 
 @app.on_event("startup")
 def on_startup():
+    os.makedirs("/app/data", exist_ok=True)
     Base.metadata.create_all(bind=engine)
 
 templates = Jinja2Templates(directory="templates")
