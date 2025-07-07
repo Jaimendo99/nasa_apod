@@ -15,10 +15,11 @@ WORKDIR /app
 # Set the path to include the user's local bin directory early
 ENV PATH="/home/appuser/.local/bin:${PATH}"
 
-# Create the data directory and ensure correct ownership
-RUN mkdir -p /app/data && \
-    useradd --create-home appuser && \
-    chown -R appuser:appuser /app
+# Create a non-root user
+RUN useradd --create-home appuser
+
+# Create the data directory
+RUN mkdir -p /app/data
 
 # Switch to the non-root user
 USER appuser
