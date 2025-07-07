@@ -45,8 +45,8 @@ jobs:
         file: Dockerfile
         push: false # Only build, don't push yet
         tags: |
-          ghcr.io/${{ github.repository }}:latest
-          ghcr.io/${{ github.repository }}:${{ github.sha }}
+          ghcr.io/jaimendo99/nasa_apod:latest
+          ghcr.io/jaimendo99/nada_apod:${{ github.sha }}
 
   deploy:
     runs-on: ubuntu-latest
