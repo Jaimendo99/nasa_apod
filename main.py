@@ -66,10 +66,10 @@ async def read_root(request: Request, date: str = None, db: Session = Depends(ge
                 return templates.TemplateResponse("index.html", {"request": request, "error": f"No APOD found for {current_date.strftime('%Y-%m-%d')}."})
             else:
                 raise e
-        
+
         prev_date = (current_date - timedelta(days=1)).strftime("%Y-%m-%d")
         next_date = (current_date + timedelta(days=1)).strftime("%Y-%m-%d")
-        
+
         is_favorite = False
         if user:
             favorite = db.query(Favorite).filter_by(owner_id=user.id, apod_date=current_date).first()
@@ -97,7 +97,7 @@ async def signup(request: Request, username: str = Form(...), password: str = Fo
     user = db.query(User).filter(User.username == username).first()
     if user:
         return templates.TemplateResponse("signup.html", {"request": request, "error": "Username already exists"})
-    
+
     hashed_password = get_password_hash(password)
     new_user = User(username=username, hashed_password=hashed_password)
     db.add(new_user)
@@ -135,7 +135,7 @@ async def add_favorite(request: Request, apod_date: str = Form(...), db: Session
     token = request.cookies.get("access_token")
     if not token:
         return RedirectResponse(url="/login", status_code=303)
-    
+
     user = get_current_user(token.split(" ")[1], db)
     date_obj = datetime.strptime(apod_date, "%Y-%m-%d").date()
 
@@ -147,7 +147,7 @@ async def add_favorite(request: Request, apod_date: str = Form(...), db: Session
         new_favorite = Favorite(apod_date=date_obj, owner_id=user.id)
         db.add(new_favorite)
         db.commit()
-    
+
     return RedirectResponse(url=f"/?date={apod_date}", status_code=303)
 
 @app.get("/favorites")
@@ -166,9 +166,13 @@ async def favorites(request: Request, db: Session = Depends(get_db)):
             api_key = os.getenv("NASA_API_KEY", "DEMO_KEY")
             url = f"https://api.nasa.gov/planetary/apod?api_key={api_key}&date={date_str}"
             tasks.append(client.get(url))
-        
+
         responses = await asyncio.gather(*tasks)
 
     apods = [res.json() for res in responses]
 
     return templates.TemplateResponse("favorites.html", {"request": request, "apods": apods, "user": user})
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0.0", port=8000)
