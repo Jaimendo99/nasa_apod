@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("Application startup: Creating data directory and database tables")
-    os.makedirs("/app/data", exist_ok=True)
+    os.makedirs("data", exist_ok=True)
     Base.metadata.create_all(bind=engine)
     logger.info("Database tables created successfully")
     yield
