@@ -29,6 +29,11 @@ logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    """
+    Manages application startup and shutdown tasks for the FastAPI app.
+    
+    On startup, creates the data directory and initializes database tables. On shutdown, performs any necessary cleanup.
+    """
     logger.info("Application startup: Creating data directory and database tables")
     os.makedirs("/app/data", exist_ok=True)
     Base.metadata.create_all(bind=engine)
@@ -53,6 +58,19 @@ def get_db():
         db.close()
 
 async def get_nasa_apod_data(date: str = None):
+    """
+    Fetch NASA's Astronomy Picture of the Day (APOD) data for a specified date asynchronously.
+    
+    Parameters:
+        date (str, optional): The date in 'YYYY-MM-DD' format for which to retrieve APOD data. If not provided, retrieves data for the current day.
+    
+    Returns:
+        dict: The JSON response containing APOD data from NASA's API.
+    
+    Raises:
+        httpx.HTTPStatusError: If the API request returns an unsuccessful HTTP status.
+        Exception: For any unexpected errors during the request.
+    """
     api_key = os.getenv("NASA_API_KEY", "DEMO_KEY")
     url = f"https://api.nasa.gov/planetary/apod?api_key={api_key}"
     if date:
@@ -74,6 +92,11 @@ async def get_nasa_apod_data(date: str = None):
 
 @app.get("/")
 async def read_root(request: Request, date: str = None, db: Session = Depends(get_db)):
+    """
+    Handles the root endpoint by displaying the NASA Astronomy Picture of the Day (APOD) for a specified date, with user authentication and favorite status support.
+    
+    If a date is provided, fetches the APOD for that date; otherwise, defaults to the current date. Authenticated users can see whether the APOD is marked as a favorite. Renders the main page with APOD data, navigation for previous and next dates, user info, and favorite status. Displays error messages for invalid dates or API errors.
+    """
     try:
         user = None
         try:
@@ -126,6 +149,11 @@ async def signup_form(request: Request):
 
 @app.post("/signup")
 async def signup(request: Request, username: str = Form(...), password: str = Form(...), db: Session = Depends(get_db)):
+    """
+    Handles user signup by creating a new user account if the username is not already taken.
+    
+    If the username exists, renders the signup form with an error message. On successful registration, redirects the user to the login page.
+    """
     logger.info(f"User signup attempt for username: {username}")
     user = db.query(User).filter(User.username == username).first()
     if user:
@@ -147,6 +175,11 @@ async def login_form(request: Request):
 
 @app.post("/login")
 async def login(response: Response, request: Request, username: str = Form(...), password: str = Form(...), db: Session = Depends(get_db)):
+    """
+    Authenticates a user and sets an access token cookie upon successful login.
+    
+    If the provided credentials are valid, issues a JWT access token with a 30-minute expiry and redirects to the home page. If authentication fails, renders the login page with an error message.
+    """
     logger.info(f"Login attempt for username: {username}")
     user = db.query(User).filter(User.username == username).first()
     if not user or not verify_password(password, user.hashed_password):
@@ -164,6 +197,12 @@ async def login(response: Response, request: Request, username: str = Form(...),
 
 @app.get("/logout")
 async def logout(response: Response):
+    """
+    Logs out the current user by deleting the access token cookie and redirecting to the home page.
+    
+    Returns:
+        RedirectResponse: A redirect response to the root URL with the access token cookie removed.
+    """
     logger.info("User logout")
     response = RedirectResponse(url="/", status_code=303)
     response.delete_cookie("access_token")
@@ -191,6 +230,11 @@ async def add_favorite(request: Request, apod_date: str = Form(...), db: Session
 
 @app.get("/favorites")
 async def favorites(request: Request, db: Session = Depends(get_db)):
+    """
+    Display the authenticated user's list of favorite NASA APOD entries.
+    
+    If the user is not authenticated, redirects to the login page. Fetches APOD data for each favorite date asynchronously and renders the favorites page with the retrieved entries.
+    """
     token = request.cookies.get("access_token")
     if not token:
         return RedirectResponse(url="/login", status_code=303)
