@@ -2,7 +2,7 @@ import pytest
 from fastapi.testclient import TestClient
 from unittest.mock import patch
 from main import app
-import requests
+import httpx
 
 client = TestClient(app)
 
@@ -24,7 +24,7 @@ def mock_nasa_api_success():
 @pytest.fixture
 def mock_nasa_api_failure():
     with patch('main.get_nasa_apod_data') as mock_get:
-        mock_get.side_effect = requests.exceptions.RequestException("Failed to fetch data from NASA API")
+        mock_get.side_effect = httpx.RequestError("Failed to fetch data from NASA API")
         yield
 
 def test_read_root_success(mock_nasa_api_success):
@@ -35,7 +35,7 @@ def test_read_root_success(mock_nasa_api_success):
 def test_read_root_failure(mock_nasa_api_failure):
     response = client.get("/")
     assert response.status_code == 200
-    assert "Error: Failed to fetch data from NASA API" in response.text
+    assert "Failed to fetch data from NASA API" in response.text
 
 
 def test_read_root_with_date(mock_nasa_api_success):

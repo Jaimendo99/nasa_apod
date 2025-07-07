@@ -1,25 +1,55 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>NASA Astronomy Picture of the Day</title>
-    <link rel="stylesheet" href="/static/styles.css">
+    <title>NASA APOD</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/styles.css') }}">
 </head>
 <body>
     <div class="container">
-        <h1>NASA Astronomy Picture of the Day</h1>
-        <div class="date-nav">
-            <a href="/?date={{ prev_date }}" class="btn">Previous Day</a>
-            <span>{{ date }}</span>
-            <a href="/?date={{ next_date }}" class="btn">Next Day</a>
+        <div class="auth-buttons">
+            {% if user %}
+                <a href="/favorites">My Favorites</a>
+                <a href="/logout">Logout</a>
+            {% else %}
+                <a href="/login">Login</a>
+                <a href="/signup">Sign Up</a>
+            {% endif %}
         </div>
+
+        <div class="date-selector">
+            <form method="get" action="/">
+                <input type="date" name="date" value="{{ date }}">
+                <button type="submit">Go to Date</button>
+            </form>
+        </div>
+
+        <h1>NASA Astronomy Picture of the Day</h1>
+
         {% if error %}
-            <p class="error">Error: {{ error }}</p>
+            <p class="error">{{ error }}</p>
         {% else %}
-            <h2>{{ apod_data.title }}</h2>
-            <p class="date">{{ apod_data.date }}</p>
-            <img src="{{ apod_data.url }}" alt="{{ apod_data.title }}">
-            <p class="explanation">{{ apod_data.explanation }}</p>
-            <p class="copyright">&copy; {{ apod_data.copyright }}</p>
+            <div class="apod-container">
+                <h2>{{ apod_data.title }}</h2>
+                <p>{{ date }}</p>
+                {% if apod_data.media_type == 'image' %}
+                    <img src="{{ apod_data.url }}" alt="{{ apod_data.title }}">
+                {% elif apod_data.media_type == 'video' %}
+                    <iframe src="{{ apod_data.url }}" frameborder="0" allowfullscreen></iframe>
+                {% endif %}
+                <p>{{ apod_data.explanation }}</p>
+
+                {% if user %}
+                    <form method="post" action="/favorite">
+                        <input type="hidden" name="apod_date" value="{{ date }}">
+                        <button type="submit">{{ 'Unfavorite' if is_favorite else 'Favorite' }}</button>
+                    </form>
+                {% endif %}
+            </div>
+
+            <div class="navigation">
+                <a href="/?date={{ prev_date }}">Previous Day</a>
+                <a href="/?date={{ next_date }}">Next Day</a>
+            </div>
         {% endif %}
     </div>
 </body>

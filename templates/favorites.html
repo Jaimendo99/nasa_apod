@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Favorites</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/styles.css') }}">
+</head>
+<body>
+    <h1>My Favorites</h1>
+    <div class="apod-container">
+        {% for apod in apods %}
+            <div class="apod-item">
+                <h2>{{ apod.title }}</h2>
+                <p>{{ apod.date }}</p>
+                {% if apod.media_type == 'image' %}
+                    <img src="{{ apod.url }}" alt="{{ apod.title }}">
+                {% elif apod.media_type == 'video' %}
+                    <iframe src="{{ apod.url }}" frameborder="0" allowfullscreen></iframe>
+                {% endif %}
+                <p>{{ apod.explanation }}</p>
+            </div>
+        {% endfor %}
+    </div>
+    <a href="/">Back to Home</a>
+</body>
+</html>

@@ -2,6 +2,10 @@ fastapi
 uvicorn
 requests
 python-dotenv
-pytest
 jinja2
+pytest
 httpx
+SQLAlchemy
+passlib[bcrypt]
+python-jose[cryptography]
+python-multipart
