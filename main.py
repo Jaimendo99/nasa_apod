@@ -8,16 +8,16 @@ from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
 from database import SessionLocal, User, Favorite, engine, Base
-
-@app.on_event("startup")
-def on_startup():
-    Base.metadata.create_all(bind=engine)
 from auth import get_password_hash, verify_password, create_access_token, get_current_user
 from dotenv import load_dotenv
 
 load_dotenv()
 
 app = FastAPI()
+
+@app.on_event("startup")
+def on_startup():
+    Base.metadata.create_all(bind=engine)
 
 templates = Jinja2Templates(directory="templates")
 
