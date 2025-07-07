@@ -1,6 +1,7 @@
 import os
 import httpx
 import asyncio
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request, Depends, Form, HTTPException, Response
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
@@ -15,10 +16,13 @@ load_dotenv()
 
 app = FastAPI()
 
-@app.on_event("startup")
-def on_startup():
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Ensure data directory exists on startup
     os.makedirs("/app/data", exist_ok=True)
     Base.metadata.create_all(bind=engine)
+    yield
+    # Clean up resources on shutdown if needed
 
 templates = Jinja2Templates(directory="templates")
 
@@ -176,4 +180,4 @@ async def favorites(request: Request, db: Session = Depends(get_db)):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8000)
