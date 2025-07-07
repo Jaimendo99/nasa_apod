@@ -28,4 +28,4 @@ class Favorite(Base):
 
     owner = relationship("User", back_populates="favorites")
 
-Base.metadata.create_all(bind=engine)
+
