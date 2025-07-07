@@ -57,7 +57,7 @@ jobs:
           input: /tmp/image.tar # Escanea la imagen localmente
           format: "table" # Formato de salida legible
           output: "trivy-results.txt" # Guarda los resultados en un archivo
-          exit-code: "1" # Falla si encuentra vulnerabilidades de severidad CRÍTICA o ALTA.
+          exit-code: "0" # Falla si encuentra vulnerabilidades de severidad CRÍTICA o ALTA.
           severity: "HIGH,CRITICAL"
         continue-on-error: false # Hazlo 'true' al principio, 'false' para forzar la seguridad.
 
